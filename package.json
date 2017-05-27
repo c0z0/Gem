@@ -1,0 +1,25 @@
+{
+  "name": "gem",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava",
+    "dev": "node server.js",
+    "buid": "next build",
+    "start": "NODE_ENV=production node server.js"
+  },
+  "author": "Cosmin Serdean",
+  "license": "ISC",
+  "repository": {
+    "url": "https://github.com/cserdean/Gem.git"
+  },
+  "dependencies": {
+    "next": "^2.4.0",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4"
+  },
+  "devDependencies": {
+    "ava": "^0.19.1"
+  }
+}
