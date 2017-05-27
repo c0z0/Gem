@@ -1,24 +1,62 @@
 import React, { Component } from 'react'
-import Header from '../components/header.js'
-import Radium from 'radium'
+import Radium, { StyleRoot } from 'radium'
+import autobind from 'autobind-decorator'
+import Router from 'next/router'
+
+import Header from '../components/Header.js'
+
+const stages = {
+	email: {
+		text: 'To sign up or login enter your email below:',
+		placeholder: 'Email...',
+		type: 'email'
+	},
+	old: {
+		text: 'To continue, enter your password bellow: ',
+		placeholder: 'Password...',
+		type: 'password'
+	},
+	new: {
+		text: 'It looks that you are new here! To continue, enter a password bellow: ',
+		placeholder: 'Password...',
+		type: 'password'
+	}
+}
 
 @Radium class Index extends Component {
-	state = {}
+	state = { email: '', stage: 'email', password: '' }
+
+	@autobind async check() {
+		if (this.state.stage === 'email')
+			this.setState({ stage: ['new', 'old'][Math.floor(Math.random() * 2)] })
+		else Router.replace('/gems')
+	}
+
 	render() {
 		return (
-			<div style={styles.container}>
+			<StyleRoot>
 				<Header />
-				<h1 style={styles.heading}>Gem</h1>
-				<h3 style={styles.heading}>
-					To sign up or login enter your email below:
-				</h3>
-				<div style={styles.inputContainer}>
-					<input type="email" style={styles.input} placeholder="Email..." />
-					<div style={styles.inputButton}>
-						<i class="material-icons">check</i>
+				<div style={styles.container}>
+					<h1 style={styles.heading}>Gem</h1>
+					<h3 style={styles.heading}>{stages[this.state.stage].text}</h3>
+					<div style={styles.inputContainer}>
+						<input
+							type={stages[this.state.stage].type}
+							style={styles.input}
+							placeholder={stages[this.state.stage].placeholder}
+							onChange={e => {
+								const newState = {}
+								newState[stages[this.state.stage].type] = e.target.value
+								this.setState(newState)
+							}}
+							value={this.state[stages[this.state.stage].type]}
+						/>
+						<div style={styles.inputButton} onClick={this.check}>
+							<i class="material-icons">check</i>
+						</div>
 					</div>
 				</div>
-			</div>
+			</StyleRoot>
 		)
 	}
 }
@@ -62,11 +100,6 @@ const styles = {
 		display: 'flex',
 		cursor: 'pointer',
 		transition: 'all .2s'
-	},
-	'@media only screen and (min-device-width: 320px) and (max-device-width: 480px)': {
-		inputContainer: {
-			width: '80%'
-		}
 	}
 }
 

@@ -15,6 +15,8 @@
     "url": "https://github.com/cserdean/Gem.git"
   },
   "dependencies": {
+    "autobind-decorator": "^1.4.1",
+    "axios": "^0.16.1",
     "babel-plugin-react-html-attrs": "^2.0.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "express": "^4.15.3",

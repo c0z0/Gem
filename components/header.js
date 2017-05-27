@@ -6,13 +6,19 @@ class Header extends Component {
 	render() {
 		return (
 			<Head>
+				<title>Gem</title>
 				<style>
 					{`body {
 							font-family: 'Raleway', sans-serif;
 							padding: 0;
 							margin: 0;
+							background-color: ${this.props.purple ? '#75489B' : '#fff'}
 						}`}
 				</style>
+				<link
+					rel="stylesheet"
+					href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/components/label.min.css"
+				/>
 				<link
 					href="https://fonts.googleapis.com/icon?family=Material+Icons"
 					rel="stylesheet"
