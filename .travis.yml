@@ -2,7 +2,7 @@ language: node_js
 node_js:
 - '7'
 after_script:
-  - NOW_ALIAS=gem node_modules/.bin/now-travis
+  - NOW_ALIAS=gem-master node_modules/.bin/now-travis
 branches:
   only:
     - master
