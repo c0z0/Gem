@@ -1,3 +1,11 @@
 language: node_js
 node_js:
- - "7"
+- '7'
+after_script:
+  - NOW_ALIAS=gem node_modules/.bin/now-travis
+branches:
+  only:
+    - master
+env:
+  global:
+    secure: JyxgTucZv5fRb4D/7w+fJeDeXHCwKb6WP837xjU9Ijx3M8/yhAuoeykaQOMBTrA0z0W3tHZjp/iyUqo/rQq2WhQ5nhWndQDLlf1sdaqm97kFsA+iuOrdQQefmjxeqGRtf4LivXNId4dnE0wPFcVlqRwC94Roqv/AknfXC8Q2g0eP7KLWxygzDx+P6t55+nZeJh/bHm4ttcu6jZ8PmXNgna/Q8/mWNTts1v5UdRN2uBFeWPf6/snSs9pAO3S4Yw2qjQBNSlrwNC+8LtJ7Pgk+yZUXkbleC37zjvTq9ANjQjflh9o2XDRACXdMwOOnZ26QCP0Ts40wU8jOPT+83fodoqMYndLQMAP9C6Cj3TMQ5AYzOuUTGe8u4uFtEtAVE762ul/iykoESreHV/QSBP4yhReL+uUNjiB1eVVYST543QOnGKMkWsLqDO7rBj8zbgBjLT/w7Wk5RMNRuU3NK60Osr8/OwZqF3O6qRmTfY/JIahpKofXFZ7xMNZPKtDRBwaBaGFcD8v+wjz5M/E+uboNeKXD5cnSwzUcaxtkG2BrcQ/vNr1p+Q3c/TpQtKzM6hVOxGeeghl+6wMCH7nHQvOjZNdVUrpmoylxmhLtpfNBbd6uRxrK4iFKunrX3Y0/Eh5+Qq9QorDKoS7Qp8wpWTthDatJcJKBQXBmrsmN+gJOe70=
