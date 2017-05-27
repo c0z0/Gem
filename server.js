@@ -10,10 +10,6 @@ app
 	.then(() => {
 		const server = express()
 
-		server.get('/car/:car', (req, res) => {
-			app.render(req, res, '/car', req.params)
-		})
-
 		server.get('*', (req, res) => {
 			return handle(req, res)
 		})
