@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import Radium, { StyleRoot } from 'radium'
 import autobind from 'autobind-decorator'
 import Router from 'next/router'
+import axios from 'axios'
+import cookie from 'js-cookie'
 
 import Header from '../components/Header.js'
 
@@ -24,36 +26,131 @@ const stages = {
 }
 
 @Radium class Index extends Component {
-	state = { email: '', stage: 'email', password: '' }
+	state = {
+		email: '',
+		stage: 'email',
+		password: '',
+		err: false,
+		loading: false
+	}
 
-	@autobind async check() {
-		if (this.state.stage === 'email')
-			this.setState({ stage: ['new', 'old'][Math.floor(Math.random() * 2)] })
-		else Router.replace('/gems')
+	@autobind async check(e) {
+		e.preventDefault()
+		if (this.state.stage === 'email') {
+			if (!this.state.email.length) return
+			try {
+				this.setState({ loading: true })
+				const { data } = await axios.post('/api/email', {
+					email: this.state.email
+				})
+				if (data.err) return this.setState({ err: data.err, loading: false })
+				this.setState({
+					stage: data.new ? 'new' : 'old',
+					err: '',
+					loading: false
+				})
+				this._input.focus()
+			} catch (err) {
+				this.setState({ err: err.message, loading: false })
+			}
+		} else {
+			if (!this.state.password.length) return
+			try {
+				this.setState({ loading: true })
+				const {
+					data
+				} = await axios.post(
+					`/api/${this.state.stage === 'old' ? 'login' : 'register'}`,
+					{
+						email: this.state.email,
+						password: this.state.password
+					}
+				)
+				if (data.err) return this.setState({ err: data.err, loading: false })
+				cookie.set('session', data._id)
+				Router.replace('/gems')
+			} catch (err) {
+				this.setState({ err: err.message, loading: false })
+			}
+		}
+	}
+
+	static getInitialProps({ query, req }) {
+		return {
+			err: query.err,
+			userAgent: req ? req.headers['user-agent'] : navigator.userAgent
+		}
 	}
 
 	render() {
 		return (
-			<StyleRoot>
+			<StyleRoot radiumConfig={{ userAgent: this.props.userAgent }}>
 				<Header />
-				<div style={styles.container}>
-					<h1 style={styles.heading}>Gem</h1>
-					<h3 style={styles.heading}>{stages[this.state.stage].text}</h3>
-					<div style={styles.inputContainer}>
-						<input
-							type={stages[this.state.stage].type}
-							style={styles.input}
-							placeholder={stages[this.state.stage].placeholder}
-							onChange={e => {
-								const newState = {}
-								newState[stages[this.state.stage].type] = e.target.value
-								this.setState(newState)
-							}}
-							value={this.state[stages[this.state.stage].type]}
-						/>
-						<div style={styles.inputButton} onClick={this.check}>
-							<i class="material-icons">check</i>
+				{this.state.err || this.props.err
+					? <div style={styles.message}>
+
+							{this.state.err || this.props.err}
 						</div>
+					: null}
+				<div style={styles.container}>
+					<div style={styles.card}>
+						<h1 style={styles.heading}>Gem</h1>
+						<h3 style={styles.heading}>{stages[this.state.stage].text}</h3>
+						<form style={styles.inputContainer} onSubmit={this.check}>
+							{this.state.stage !== 'email'
+								? <div
+										style={[styles.inputButton, { flex: 0.5 }]}
+										onClick={() => {
+											this.setState({ stage: 'email', password: '' })
+											this._input.focus()
+										}}
+									>
+										<i class="material-icons">arrow_back</i>
+									</div>
+								: null}
+							<input
+								autoFocus
+								ref={i => {
+									this._input = i
+								}}
+								type={stages[this.state.stage].type}
+								style={styles.input}
+								placeholder={stages[this.state.stage].placeholder}
+								onChange={e => {
+									const newState = {}
+									newState[stages[this.state.stage].type] = e.target.value
+									this.setState(newState)
+								}}
+								value={this.state[stages[this.state.stage].type]}
+							/>
+							<input type="submit" style={{ display: 'none' }} />
+							<div
+								style={[
+									styles.inputButton,
+									{
+										color: this.state[
+											this.state.stage === 'email' ? 'email' : 'password'
+										].length
+											? '#75489B'
+											: '#aaa',
+										cursor: this.state[
+											this.state.stage === 'email' ? 'email' : 'password'
+										].length
+											? 'pointer'
+											: 'default'
+									}
+								]}
+								onClick={this.check}
+							>
+								{this.state.loading
+									? <div class="spinner">
+											<div class="bounce1" />
+											<div class="bounce2" />
+											<div class="bounce3" />
+										</div>
+									: <i class="material-icons">check</i>}
+							</div>
+						</form>
 					</div>
 				</div>
 			</StyleRoot>
@@ -62,10 +159,18 @@ const stages = {
 }
 
 const styles = {
+	message: {
+		padding: '16px',
+		position: 'absolute',
+		bottom: 0,
+		left: '50%',
+		borderWidth: '1px',
+		borderStyle: 'solid',
+		borderColor: '#75489B',
+		borderBottomColor: '#fff',
+		transform: 'translateX(-50%)'
+	},
 	container: {
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
 		backgroundColor: '#fff',
 		height: '100vh',
 		flexDirection: 'column'
@@ -75,20 +180,24 @@ const styles = {
 		fontWeight: '500'
 	},
 	card: {
-		width: '50%',
+		width: '40%',
+		position: 'fixed',
+		top: '50%',
+		left: '50%',
+		transform: 'translate(-50%, -50%)',
 		textAlign: 'center'
 	},
 	inputContainer: {
 		display: 'flex',
 		flexDirection: 'row',
 		borderBottom: '1px #75489B solid',
-		width: '40%'
+		width: '100%'
 	},
 	input: {
 		border: 0,
 		outline: 0,
 		color: '#0000',
-		padding: '8',
+		padding: '8px',
 		flex: 5,
 		fontSize: '130%'
 	},

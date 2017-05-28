@@ -1,21 +1,27 @@
 import React, { Component } from 'react'
 import Radium from 'radium'
+import autobind from 'autobind-decorator'
 
 @Radium class Gem extends Component {
 	state = {}
+
+	@autobind onRemove() {
+		this.props.onRemove(this.props._id)
+	}
+
 	render() {
 		return (
 			<div style={styles.container}>
-				<i className="material-icons" style={styles.close}>close</i>
+				<i
+					className="material-icons"
+					style={styles.close}
+					onClick={this.onRemove}
+				>
+					close
+				</i>
 				<div style={styles.main}>
-					<a href="http://www.youtube.com" style={styles.link}>Youtube</a>
-					{/*<div style={styles.tags}>
-						<div className="ui label" style={{ fontFamily: " 'Raleway' " }}>
-							23
-						</div>
-					</div>*/}
+					<a href={this.props.url} style={styles.link}>{this.props.title}</a>
 				</div>
-
 			</div>
 		)
 	}
