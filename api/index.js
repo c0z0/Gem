@@ -27,6 +27,10 @@ router.post('/register', (req, res) => {
 	const password = bcrypt.hashSync(req.body.password, 8)
 	User.create({ email: req.body.email, password }, (err, user) => {
 		if (err) return res.status(500).json(err.message)
+		Session.create({ email: req.body.email }, (err, session) => {
+			if (err) return res.status(500).json(err.message)
+			res.json(session)
+		})
 	})
 })
 

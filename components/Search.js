@@ -54,12 +54,12 @@ const styles = {
 		padding: '0 24px'
 	},
 	input: {
-		border: 0,
 		outline: 0,
 		color: '#0000',
 		padding: '8px',
 		flex: 7,
 		fontSize: '130%',
-		width: '80%'
+		width: '80%',
+		borderWidth: '0'
 	}
 }

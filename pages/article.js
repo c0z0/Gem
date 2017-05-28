@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-import Radium from 'radium'
+import Radium, { StyleRoot } from 'radium'
 import autobind from 'autobind-decorator'
 import Router from 'next/router'
 
@@ -10,15 +10,7 @@ import Header from '../components/Header.js'
 	state = { content: ['Loading...'], scroll: 100 }
 
 	async componentDidMount() {
-		const { data } = await axios.get(`/api/article/${this.props.url.query.id}`)
 		window.addEventListener('scroll', this.handleScroll)
-		console.log(data)
-		this.setState({
-			content: data.content,
-			heading: data.heading,
-			url: data.url,
-			title: data.title
-		})
 	}
 
 	@autobind handleScroll() {
@@ -35,7 +27,7 @@ import Header from '../components/Header.js'
 	}
 
 	render() {
-		let content = this.state.content
+		let content = this.props.content
 		if (!content.length)
 			content = (
 				<h3 style={{ textAlign: 'center' }}>
@@ -72,7 +64,7 @@ import Header from '../components/Header.js'
 						{' '}
 						Gem
 					</h2>
-					<a href={this.state.url} style={styles.open}>
+					<a href={this.props.outsideUrl} style={styles.open}>
 						Open original
 						<i
 							class="material-icons"
@@ -84,8 +76,8 @@ import Header from '../components/Header.js'
 					</a>
 				</div>
 				<div style={styles.article}>
-					<Header title={'Gem | ' + this.state.title} />
-					<h1 style={{ textAlign: 'center' }}>{this.state.heading}</h1>
+					<Header title={'Gem | ' + this.props.title} />
+					<h1 style={{ textAlign: 'center' }}>{this.props.heading}</h1>
 					{content}
 					{content.length
 						? <p
@@ -135,7 +127,10 @@ const styles = {
 		color: '#fff',
 		textAlign: 'justify',
 		padding: '48px',
-		fontFamily: 'Roboto Slab'
+		fontFamily: 'Roboto Slab',
+		'@media (max-width: 520px)': {
+			padding: '16px'
+		}
 	},
 	heading: {
 		color: '#75489B',
@@ -155,11 +150,32 @@ const styles = {
 		position: 'absolute',
 		top: '50%',
 		right: '16px',
-		transform: 'translateY(-50%)'
+		transform: 'translateY(-50%)',
+		color: '#75489B'
 	},
 	menuBar: {
 		position: 'relative'
 	}
 }
 
-export default Article
+export default class Wrapper extends Component {
+	static async getInitialProps({ query, req }) {
+		const baseUrl = req ? `${req.protocol}://${req.headers.host}` : ''
+		const { data } = await axios.get(baseUrl + `/api/article/${query.id}`)
+		return {
+			content: data.content,
+			heading: data.heading,
+			outsideUrl: data.url,
+			title: data.title,
+			userAgent: req ? req.headers['user-agent'] : navigator.userAgent
+		}
+	}
+
+	render() {
+		return (
+			<StyleRoot radiumConfig={{ userAgent: this.props.userAgent }}>
+				<Article {...this.props} />
+			</StyleRoot>
+		)
+	}
+}

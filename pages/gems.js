@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import Radium, { StyleRoot } from 'radium'
 import autobind from 'autobind-decorator'
 import axios from 'axios'
-import cookie from 'js-cookie'
+import frontCookie from 'js-cookie'
+import cookie from 'cookie'
 import Router from 'next/router'
 import _ from 'lodash'
 
@@ -13,23 +14,26 @@ import Gem from '../components/Gem.js'
 import Header from '../components/Header.js'
 
 @Radium class Gems extends Component {
-	state = {
-		new: '',
-		gems: false,
-		err: false,
-		stage: 0,
-		tags: [],
-		url: {},
-		search: false,
-		title: '',
-		tag: ''
+	constructor(props) {
+		super(props)
+		this.state = {
+			new: '',
+			gems: props.gems,
+			err: false,
+			stage: 0,
+			tags: [],
+			url: {},
+			search: false,
+			title: '',
+			tag: ''
+		}
 	}
 
 	@autobind async onUrl(e) {
 		e.preventDefault()
 		if (!this.state.new.length) return
 		this.setState({ loading: true })
-		const session = cookie.get('session')
+		const session = frontCookie.get('session')
 		try {
 			const { data } = await axios.post(`/api/gem/url/${session}`, {
 				url: this.state.new
@@ -49,7 +53,7 @@ import Header from '../components/Header.js'
 	@autobind async onAdd(e) {
 		e.preventDefault()
 		this.setState({ loading: true })
-		const session = cookie.get('session')
+		const session = frontCookie.get('session')
 		try {
 			const { data } = await axios.post(`/api/gem/${session}`, {
 				...this.state.url,
@@ -72,7 +76,7 @@ import Header from '../components/Header.js'
 
 	@autobind async onRemove(id) {
 		try {
-			const session = cookie.get('session')
+			const session = frontCookie.get('session')
 			await axios.delete(`/api/gem/${session}/${id}`)
 			const gems = this.state.gems.filter(g => {
 				return g._id !== id
@@ -84,19 +88,8 @@ import Header from '../components/Header.js'
 	}
 
 	@autobind logout() {
-		cookie.remove('session')
+		frontCookie.remove('session')
 		Router.replace('/')
-	}
-
-	async componentDidMount() {
-		const session = cookie.get('session')
-		try {
-			const { data } = await axios.get(`/api/gem/${session}`)
-			_.reverse(data)
-			this.setState({ gems: data })
-		} catch (err) {
-			this.setState({ err: err.message })
-		}
 	}
 
 	render() {
@@ -351,4 +344,27 @@ const styles = {
 	}
 }
 
-export default props => <StyleRoot><Gems {...props} /></StyleRoot>
+export default class Wrapper extends Component {
+	static async getInitialProps({ query, req }) {
+		const baseUrl = req ? `${req.protocol}://${req.headers.host}` : ''
+
+		const session = req
+			? cookie.parse(req.headers.cookie).session
+			: frontCookie.get('session')
+
+		const { data } = await axios.get(baseUrl + `/api/gem/${session}`)
+		_.reverse(data)
+		return {
+			gems: data,
+			userAgent: req ? req.headers['user-agent'] : navigator.userAgent
+		}
+	}
+
+	render() {
+		return (
+			<StyleRoot radiumConfig={{ userAgent: this.props.userAgent }}>
+				<Gems {...this.props} />
+			</StyleRoot>
+		)
+	}
+}

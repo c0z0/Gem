@@ -19,7 +19,7 @@ const stages = {
 		type: 'password'
 	},
 	new: {
-		text: 'It looks that you are new here! To continue, enter a password bellow: ',
+		text: 'It looks that you are new here! To get started, enter a password bellow: ',
 		placeholder: 'Password...',
 		type: 'password'
 	}
@@ -218,10 +218,20 @@ const styles = {
 	}
 }
 
-export default props => {
-	return (
-		<StyleRoot>
-			<Index {...props} />
-		</StyleRoot>
-	)
+export default class Wrapper extends Component {
+	static async getInitialProps(props) {
+		return {
+			userAgent: props.req
+				? props.req.headers['user-agent']
+				: navigator.userAgent
+		}
+	}
+
+	render() {
+		return (
+			<StyleRoot radiumConfig={{ userAgent: this.props.userAgent }}>
+				<Index {...this.props} />
+			</StyleRoot>
+		)
+	}
 }
