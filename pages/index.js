@@ -75,7 +75,7 @@ const stages = {
 		}
 	}
 
-	static getInitialProps({ query, req }) {
+	static async getInitialProps({ query, req }) {
 		return {
 			err: query.err,
 			userAgent: req ? req.headers['user-agent'] : navigator.userAgent
@@ -84,17 +84,20 @@ const stages = {
 
 	render() {
 		return (
-			<StyleRoot radiumConfig={{ userAgent: this.props.userAgent }}>
+			<div>
 				<Header />
-				{this.state.err || this.props.err
+				{this.state.err || this.props.url.query.err
 					? <div style={styles.message}>
-
-							{this.state.err || this.props.err}
+							{this.state.err || this.props.url.query.err}
 						</div>
 					: null}
 				<div style={styles.container}>
-					<div style={styles.card}>
-						<h1 style={styles.heading}>Gem</h1>
+					<div style={styles.card} class="card">
+						<img style={{ height: '96px' }} src="static/diamond.svg" />
+						<h1 style={styles.heading}>
+							Gem
+						</h1>
+						<h4 style={styles.heading}>Keep your precius finds.</h4>
 						<h3 style={styles.heading}>{stages[this.state.stage].text}</h3>
 						<form style={styles.inputContainer} onSubmit={this.check}>
 							{this.state.stage !== 'email'
@@ -153,7 +156,7 @@ const stages = {
 						</form>
 					</div>
 				</div>
-			</StyleRoot>
+			</div>
 		)
 	}
 }
@@ -161,7 +164,7 @@ const stages = {
 const styles = {
 	message: {
 		padding: '16px',
-		position: 'absolute',
+		position: 'fixed',
 		bottom: 0,
 		left: '50%',
 		borderWidth: '1px',
@@ -185,7 +188,10 @@ const styles = {
 		top: '50%',
 		left: '50%',
 		transform: 'translate(-50%, -50%)',
-		textAlign: 'center'
+		textAlign: 'center',
+		'@media (max-width: 520px)': {
+			width: '95%'
+		}
 	},
 	inputContainer: {
 		display: 'flex',
@@ -212,4 +218,10 @@ const styles = {
 	}
 }
 
-export default Index
+export default props => {
+	return (
+		<StyleRoot>
+			<Index {...props} />
+		</StyleRoot>
+	)
+}

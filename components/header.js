@@ -6,10 +6,26 @@ class Header extends Component {
 	render() {
 		return (
 			<Head>
-				<title>Gem</title>
+				<title>{this.props.title || 'Gem'}</title>
+				<meta name="theme-color" content="#ffaa64" />
+				<link
+					rel="icon"
+					type="image/png"
+					sizes="32x32"
+					href="/static/favicon-32x32.png"
+				/>
+				<link
+					rel="icon"
+					type="image/png"
+					sizes="16x16"
+					href="/static/favicon-16x16.png"
+				/>
+				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 				<style>
-					{`body {
-							font-family: 'Raleway', arial;
+					{`
+						body {
+							font-family: Arial;
+							font-family: 'Raleway', Arial;
 							padding: 0;
 							margin: 0;
 							background-color: ${this.props.purple ? '#75489B' : '#fff'}
@@ -22,7 +38,7 @@ class Header extends Component {
 .spinner > div {
   width: 9px;
   height: 9px;
-  background-color: #75489B;
+  background-color: #ffaa64;
 
   border-radius: 100%;
   display: inline-block;
@@ -61,11 +77,7 @@ class Header extends Component {
 					href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/components/label.min.css"
 				/>
 				<link
-					href="https://fonts.googleapis.com/icon?family=Material+Icons"
-					rel="stylesheet"
-				/>
-				<link
-					href="https://fonts.googleapis.com/css?family=Raleway:400,700"
+					href="https://fonts.googleapis.com/css?family=Raleway:400,700|Roboto+Slab|Material+Icons"
 					rel="stylesheet"
 				/>
 			</Head>

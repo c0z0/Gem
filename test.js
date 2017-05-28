@@ -1,7 +1,13 @@
-const meta = require('node-metainspector')
+const scrapeIt = require('scrape-it')
 
-var page = new meta('http://www.google.com')
-
-page.on('fetch', () => {
-	console.log(page.title)
+// Promise interface
+scrapeIt(
+	'https://hackernoon.com/how-to-graft-react-on-to-legacy-code-3ad86e55e2f1',
+	{
+		title: 'h1',
+		content: 'p',
+		title: 'title'
+	}
+).then(page => {
+	console.log(page)
 })

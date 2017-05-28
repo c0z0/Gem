@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const bcrypt = require('bcryptjs')
 const request = require('request')
+const scrapeIt = require('scrape-it')
 const cheerio = require('cheerio')
 
 const Session = require('./Session.js')
@@ -42,21 +43,54 @@ router.post('/login', (req, res) => {
 	})
 })
 
-router.post('/gem/:session', (req, res) => {
+router.post('/gem/url/:session', (req, res) => {
 	Session.findById(req.params.session, (err, session) => {
 		if (err) return res.status(500).json(err.message)
 		if (!session) return res.status(403).json('Invalid session')
 		let { url } = req.body
 		if (url.substring(0, 4) !== 'http') url = 'http://' + url
-		request(url, (error, response, html) => {
-			if (error) return res.json({ err: 'Invalid url.' })
-			const $ = cheerio.load(html)
-			const title = $('title').text()
-			Gem.create({ email: session.email, url, title }, (err, gem) => {
+		scrapeIt(url, {
+			title: 'title',
+			heading: 'h1',
+			content: {
+				listItem: 'p'
+			}
+		})
+			.then(d => {
+				let content = d.content.filter(e => {
+					return typeof e === 'string'
+				})
+				res.json({
+					url,
+					title: d.title,
+					content: content,
+					heading: d.heading
+				})
+			})
+			.catch(err => {
+				return res.json({ err: 'Invalid url.', error: err })
+			})
+	})
+})
+
+router.post('/gem/:session', (req, res) => {
+	Session.findById(req.params.session, (err, session) => {
+		if (err) return res.status(500).json(err.message)
+		if (!session) return res.status(403).json('Invalid session')
+		Gem.create(
+			{
+				email: session.email,
+				url: req.body.url,
+				title: req.body.title,
+				tags: req.body.tags,
+				content: req.body.content,
+				heading: req.body.heading
+			},
+			(err, gem) => {
 				if (err) return res.status(500).json(err.message)
 				res.json(gem)
-			})
-		})
+			}
+		)
 	})
 })
 
@@ -68,6 +102,36 @@ router.get('/gem/:session', (req, res) => {
 			if (err) return res.status(500).json(err.message)
 			res.json(gems)
 		})
+	})
+})
+
+router.delete('/gem/:session/:id', (req, res) => {
+	Session.findById(req.params.session, (err, session) => {
+		if (err) return res.status(500).json(err.message)
+		if (!session) return res.status(403).json('Invalid session')
+		Gem.findById(req.params.id, (err, gem) => {
+			if (err) return res.status(500).json(err.message)
+			if (gem.email !== session.email)
+				return res.status(403).json({ err: { message: 'Invalid session' } })
+			Gem.findByIdAndRemove(req.params.id, (err, gem) => {
+				if (err) return res.status(500).json(err.message)
+				res.json(gem)
+			})
+		})
+	})
+})
+
+router.get('/article/:id', (req, res) => {
+	Gem.findById(req.params.id, (err, gem) => {
+		if (err) return res.status(500).json(err.message)
+		res.json(gem)
+	})
+})
+
+router.get('/article/problem/:id', (req, res) => {
+	Gem.findByIdAndUpdate(req.params.id, { content: [] }, (err, gem) => {
+		if (err) return res.status(500).json(err.message)
+		res.json(gem)
 	})
 })
 

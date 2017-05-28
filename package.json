@@ -7,7 +7,8 @@
     "test": "ava",
     "dev": "node server.js",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js"
+    "start": "NODE_ENV=production node server.js",
+    "deploy": "now --public -e DB_USER=@db_user -e DB_PASS=@db_pass"
   },
   "author": "Cosmin Serdean",
   "license": "ISC",
@@ -15,6 +16,7 @@
     "url": "https://github.com/cserdean/Gem.git"
   },
   "dependencies": {
+    "article-extractor": "^1.0.2",
     "autobind-decorator": "^1.4.1",
     "axios": "^0.16.1",
     "babel-plugin-react-html-attrs": "^2.0.0",
@@ -22,11 +24,14 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.2",
     "cheerio": "^1.0.0-rc.1",
+    "clipboard-js": "^0.3.3",
     "cookie-parser": "^1.4.3",
     "email-check": "^1.1.0",
     "express": "^4.15.3",
     "js-cookie": "^2.1.4",
+    "lodash": "^4.17.4",
     "mongoose": "^4.10.3",
+    "morgan": "^1.8.2",
     "next": "^2.4.0",
     "now-travis": "^1.0.0",
     "radium": "^0.19.1",
@@ -34,7 +39,8 @@
     "react-dom": "^15.5.4",
     "react-redux": "^5.0.5",
     "redux": "^3.6.0",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "scrape-it": "^3.3.2"
   },
   "devDependencies": {
     "ava": "^0.19.1"
