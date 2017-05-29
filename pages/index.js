@@ -97,7 +97,7 @@ const stages = {
 						<h1 style={styles.heading}>
 							Gem
 						</h1>
-						<h4 style={styles.heading}>Keep your precius finds.</h4>
+						<h4 style={styles.heading}>Keep your precious finds.</h4>
 						<h3 style={styles.heading}>{stages[this.state.stage].text}</h3>
 						<form style={styles.inputContainer} onSubmit={this.check}>
 							{this.state.stage !== 'email'

@@ -287,6 +287,17 @@ import Header from '../components/Header.js'
 	}
 }
 
+const slide = Radium.keyframes({
+	'0%': {
+		transform: 'translateY(-20px) scale(.9)',
+		opacity: '0'
+	},
+	'100%': {
+		opacity: '1',
+		transform: 'translateY(0px) scale(1)'
+	}
+})
+
 const styles = {
 	message: {
 		padding: '16px',
@@ -336,7 +347,9 @@ const styles = {
 		margin: '8px'
 	},
 	add: {
-		backgroundColor: '#75489B'
+		backgroundColor: '#75489B',
+		animation: 'x .3s',
+		animationName: slide
 	},
 	spinnerContainer: {
 		textAlign: 'center',
