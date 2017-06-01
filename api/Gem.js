@@ -6,6 +6,7 @@ const GemSchema = new mongoose.Schema({
 	email: String,
 	tags: Array,
 	content: Array,
+	time: Number,
 	heading: String
 })
 

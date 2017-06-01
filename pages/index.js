@@ -67,7 +67,7 @@ const stages = {
 					}
 				)
 				if (data.err) return this.setState({ err: data.err, loading: false })
-				cookie.set('session', data._id)
+				cookie.set('session', data._id, { expires: 14 })
 				Router.replace('/gems')
 			} catch (err) {
 				this.setState({ err: err.message, loading: false })

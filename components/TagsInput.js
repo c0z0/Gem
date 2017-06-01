@@ -5,8 +5,13 @@ import autobind from 'autobind-decorator'
 @Radium class Input extends Component {
 	state = { tag: '', tags: [] }
 
+	@autobind getTags() {
+		if (this.state.tag.length) return this.state.tags.concat([this.state.tag])
+		return this.state.tags
+	}
+
 	render() {
-		const tags = this.props.tags.map((t, i) => (
+		const tags = this.state.tags.map((t, i) => (
 			<div style={styles.tag} key={i}>
 				{t}
 				{' '}
@@ -15,9 +20,9 @@ import autobind from 'autobind-decorator'
 					style={styles.closeIcon}
 					key={i * 6}
 					onClick={() => {
-						const ts = this.props.tags
+						const ts = this.state.tags
 						ts.splice(i, 1)
-						this.props.onChange(ts)
+						this.setState({ tags: ts })
 					}}
 				>
 					close
@@ -36,20 +41,21 @@ import autobind from 'autobind-decorator'
 					type="text"
 					style={styles.input}
 					placeholder={
-						this.props.disabled
+						this.state.tags.length === 5
 							? "Can't add more tags"
-							: this.props.tags.length ? '' : 'Add some tags... (optional)'
+							: this.state.tags.length ? '' : 'Add some tags... (optional)'
 					}
 					onKeyDown={e => {
-						if (e.keyCode === 8 && this.state.tag.length === 0)
-							this.props.onChange(this.props.tags.slice(0, -1))
+						if (e.keyCode === 8 && this.state.tag.length === 0) {
+							this.setState({ tags: this.state.tags.slice(0, -1) })
+						}
 					}}
 					onChange={e => {
-						if (this.props.disabled) return
+						if (this.state.tags.length === 5) return
 						const { value } = e.target
 						if (value[value.length - 1] === ' ' && value.trim().length) {
-							this.props.onChange(this.props.tags.concat([value.trim()]))
 							return this.setState({
+								tags: this.state.tags.concat([value.trim()]),
 								tag: ''
 							})
 						}

@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const request = require('request')
 const scrapeIt = require('scrape-it')
 const cheerio = require('cheerio')
+const _ = require('lodash')
 
 const Session = require('./Session.js')
 const User = require('./User.js')
@@ -81,6 +82,7 @@ router.post('/gem/:session', (req, res) => {
 	Session.findById(req.params.session, (err, session) => {
 		if (err) return res.status(500).json(err.message)
 		if (!session) return res.status(403).json('Invalid session')
+		const time = new Date().getTime()
 		Gem.create(
 			{
 				email: session.email,
@@ -88,7 +90,8 @@ router.post('/gem/:session', (req, res) => {
 				title: req.body.title,
 				tags: req.body.tags,
 				content: req.body.content,
-				heading: req.body.heading
+				heading: req.body.heading,
+				time
 			},
 			(err, gem) => {
 				if (err) return res.status(500).json(err.message)
@@ -104,7 +107,14 @@ router.get('/gem/:session', (req, res) => {
 		if (!session) return res.status(403).json('Invalid session')
 		Gem.find({ email: session.email }, (err, gems) => {
 			if (err) return res.status(500).json(err.message)
-			res.json(gems)
+
+			res.json(
+				_.sortBy(gems, [
+					function(o) {
+						return -o.time
+					}
+				])
+			)
 		})
 	})
 })

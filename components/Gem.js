@@ -123,7 +123,6 @@ const styles = {
 		position: 'absolute',
 		top: '8px',
 		right: '9px',
-		cursor: 'pointer',
 		':hover': {
 			color: '#222'
 		}

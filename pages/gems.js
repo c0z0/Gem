@@ -53,11 +53,12 @@ import Header from '../components/Header.js'
 	@autobind async onAdd(e) {
 		e.preventDefault()
 		this.setState({ loading: true })
+		const tags = this._tagsInput.getTags()
 		const session = frontCookie.get('session')
 		try {
 			const { data } = await axios.post(`/api/gem/${session}`, {
 				...this.state.url,
-				tags: this.state.tags
+				tags
 			})
 			if (data.err) return this.setState({ err: data.err, loading: false })
 			this.setState({
@@ -66,7 +67,6 @@ import Header from '../components/Header.js'
 				new: '',
 				loading: false,
 				err: false,
-				tags: [],
 				gems: [data].concat(this.state.gems)
 			})
 		} catch (err) {
@@ -116,16 +116,13 @@ import Header from '../components/Header.js'
 		if (this.state.stage)
 			input = (
 				<TagsInput
+					ref={t => {
+						this._tagsInput = t
+					}}
 					onBack={() => {
-						this.setState({ tags: [], stage: 0 })
+						this.setState({ stage: 0 })
 					}}
 					loading={this.state.loading}
-					onChange={tags => {
-						console.log(tags)
-						this.setState({ tags })
-					}}
-					disabled={this.state.tags.length === 5}
-					tags={this.state.tags}
 					onClick={this.onAdd}
 				/>
 			)
@@ -181,6 +178,7 @@ import Header from '../components/Header.js'
 						<h2 style={styles.heading}>
 							{' '}
 							<img
+								draggable={false}
 								style={{ height: '32px', margin: 'auto' }}
 								src="/static/diamond.svg"
 							/>
@@ -238,6 +236,17 @@ import Header from '../components/Header.js'
 
 						</div>
 					</div>
+					<div
+						style={[
+							styles.blackout,
+							{
+								display: this.state.search || this.state.add ? 'block' : 'none'
+							}
+						]}
+						onClick={() => {
+							this.setState({ add: false, search: false })
+						}}
+					/>
 					<form
 						onSubmit={this.state.stage ? this.onAdd : this.onUrl}
 						style={[styles.add, { display: this.state.add ? 'flex' : 'none' }]}
@@ -252,9 +261,7 @@ import Header from '../components/Header.js'
 						style={[
 							styles.add,
 							{
-								display: this.state.search || this.props.url.query.tag
-									? 'flex'
-									: 'none'
+								display: this.state.search ? 'flex' : 'none'
 							}
 						]}
 					>
@@ -287,7 +294,7 @@ import Header from '../components/Header.js'
 	}
 }
 
-const slide = Radium.keyframes({
+const appear = Radium.keyframes({
 	'0%': {
 		transform: 'translateY(-20px) scale(.9)',
 		opacity: '0'
@@ -295,6 +302,17 @@ const slide = Radium.keyframes({
 	'100%': {
 		opacity: '1',
 		transform: 'translateY(0px) scale(1)'
+	}
+})
+
+const slide = Radium.keyframes({
+	'0%': {
+		transform: 'translateY(120px)',
+		opacity: '1'
+	},
+	'100%': {
+		opacity: '1',
+		transform: 'translateY(0px)'
 	}
 })
 
@@ -349,11 +367,41 @@ const styles = {
 	add: {
 		backgroundColor: '#75489B',
 		animation: 'x .3s',
-		animationName: slide
+		animationName: appear,
+		'@media only screen and (max-width: 520px)': {
+			position: 'fixed',
+			zIndex: 2,
+			bottom: 0,
+			left: 0,
+			right: 0,
+			boxShadow: '0px -5px 35px 0px rgba(0,0,0,0.30)',
+			borderTop: '#ffaa64 solid 8px',
+			animationName: slide
+		}
 	},
 	spinnerContainer: {
 		textAlign: 'center',
 		padding: '24px'
+	},
+	blackout: {
+		'@media only screen and (max-width: 520px)': {
+			position: 'fixed',
+			zIndex: 1,
+			top: 0,
+			bottom: 0,
+			left: 0,
+			right: 0,
+			backgroundColor: 'rgba(0,0,0,.7)',
+			animation: 'x .3s',
+			animationName: Radium.keyframes({
+				'0%': {
+					opacity: 0
+				},
+				'100%': {
+					opacity: 1
+				}
+			})
+		}
 	}
 }
 
@@ -366,7 +414,6 @@ export default class Wrapper extends Component {
 			: frontCookie.get('session')
 
 		const { data } = await axios.get(baseUrl + `/api/gem/${session}`)
-		_.reverse(data)
 		return {
 			gems: data,
 			userAgent: req ? req.headers['user-agent'] : navigator.userAgent

@@ -1,8 +1,21 @@
 import React, { Component } from 'react'
 import Radium from 'radium'
+import clipboard from 'clipboard-js'
+import autobind from 'autobind-decorator'
 
 @Radium class Input extends Component {
 	state = {}
+
+	@autobind async paste() {
+		try {
+			const value = await clipboard.paste()
+			console.log(value)
+			this.props.onChange({ target: { value } })
+		} catch (e) {
+			console.log(e)
+		}
+	}
+
 	render() {
 		return (
 			<div style={styles.inputContainer}>
