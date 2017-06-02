@@ -73,10 +73,6 @@ class Header extends Component {
 						`}
 				</style>
 				<link
-					rel="stylesheet"
-					href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.10/components/label.min.css"
-				/>
-				<link
 					href="https://fonts.googleapis.com/css?family=Raleway:400,700|Roboto+Slab|Material+Icons"
 					rel="stylesheet"
 				/>

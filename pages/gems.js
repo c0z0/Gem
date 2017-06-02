@@ -187,60 +187,65 @@ import Header from '../components/Header.js'
 							Gem
 						</h2>
 						<div style={styles.tools}>
-							<i
-								class="material-icons"
-								key="2"
-								title="Save gem..."
-								style={styles.tool}
-								onClick={() => {
-									this.setState(
-										{
-											add: !this.state.add,
-											new: '',
-											err: this.state.add ? false : this.state.err,
-											search: false
-										},
-										() => {
-											this._input.focus()
-										}
-									)
-								}}
-							>
-								add_box
-							</i>
-							<i
-								class="material-icons"
-								key="33"
-								style={styles.tool}
-								title="Search..."
-								onClick={() => {
-									this.setState({
-										search: !(this.state.search || this.props.url.query.tag),
-										title: '',
-										add: false
-									})
-									Router.replace('/gems')
-								}}
-							>
-								search
-							</i>
-							<i
-								class="material-icons"
-								key="3"
-								style={styles.tool}
-								title="Logout..."
-								onClick={this.logout}
-							>
-								exit_to_app
-							</i>
-
+							<button style={styles.toolButton} key="dsalfgsd">
+								<i
+									class="material-icons"
+									key="2"
+									title="Save gem..."
+									style={styles.tool}
+									onClick={() => {
+										this.setState(
+											{
+												add: !this.state.add,
+												new: '',
+												err: this.state.add ? false : this.state.err,
+												search: false
+											},
+											() => {
+												this._input.focus()
+											}
+										)
+									}}
+								>
+									add_box
+								</i>
+							</button>
+							<button style={styles.toolButton} key="jdasddd">
+								<i
+									class="material-icons"
+									key="33"
+									style={styles.tool}
+									title="Search..."
+									onClick={() => {
+										this.setState({
+											search: !(this.state.search || this.props.url.query.tag),
+											title: '',
+											add: false
+										})
+										Router.replace('/gems')
+									}}
+								>
+									search
+								</i>
+							</button>
+							<button style={styles.toolButton} key="dsaddasaa">
+								<i
+									class="material-icons"
+									key="3"
+									style={styles.tool}
+									title="Logout..."
+									onClick={this.logout}
+								>
+									exit_to_app
+								</i>
+							</button>
 						</div>
 					</div>
 					<div
 						style={[
 							styles.blackout,
 							{
-								display: this.state.search || this.state.add ? 'block' : 'none'
+								display: this.state.add ? 'block' : 'none'
 							}
 						]}
 						onClick={() => {
@@ -261,7 +266,10 @@ import Header from '../components/Header.js'
 						style={[
 							styles.add,
 							{
-								display: this.state.search ? 'flex' : 'none'
+								display: (this.state.search || this.props.url.query.tag) &&
+									!this.state.add
+									? 'flex'
+									: 'none'
 							}
 						]}
 					>
@@ -361,8 +369,16 @@ const styles = {
 		cursor: 'pointer',
 		':hover': {
 			color: '#9568bb'
+		}
+	},
+	toolButton: {
+		margin: '8px',
+		backgroundColor: 'rgba(0,0,0,0)',
+		border: 0,
+		':focus': {
+			outline: 0
 		},
-		margin: '8px'
+		padding: 0
 	},
 	add: {
 		backgroundColor: '#75489B',

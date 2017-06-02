@@ -149,4 +149,6 @@ router.get('/article/problem/:id', (req, res) => {
 	})
 })
 
+router.get('/nothing', (req, res) => res.send('nothing here'))
+
 module.exports = router
