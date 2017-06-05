@@ -71,6 +71,7 @@ const schema = `
 		saveGem(sessionToken: String!, url: UrlInput, tags: [String]): GemResponse
 		checkEmail(email: String!): CheckEmailResponse
 		deleteGem(sessionToken: String!, id: String!): Gem
+		undoDeleteGem(sessionToken: String!, id: String!): Gem
 	}
 
 ` 

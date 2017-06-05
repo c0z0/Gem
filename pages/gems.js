@@ -10,6 +10,8 @@ import gql from 'graphql-tag'
 
 import appoloClient from '../appoloClient.js'
 const client = appoloClient()
+
+import Tip from '../components/Tip.js'
 import SearchInput from '../components/Search.js'
 import TagsInput from '../components/TagsInput.js'
 import Input from '../components/Input.js'
@@ -119,6 +121,47 @@ import Header from '../components/Header.js'
 		}
 	}
 
+	@autobind async undoRemove(id) {
+		try {
+			const session = frontCookie.get('session')
+			await client.mutate({
+				mutation: gql`
+					mutation undoRemoveGem($id: String!, $session: String!) {
+						undoDeleteGem(id: $id, sessionToken: $session) {
+							title
+						}
+					}
+				`,
+				variables: {
+					id,
+					session
+				}
+			})
+			const { data: { gems: { gems, hasNextPage } } } = await client.query({
+				query: gql`
+					query getGems($session: String!) {
+						gems(sessionToken: $session) {
+							hasNextPage
+							gems {
+								title
+								url
+								hasContent
+								tags
+								_id
+							}
+						}
+					}
+				`,
+				variables: {
+					session
+				}
+			})
+			this.setState({ gems, tip: false })
+		} catch (err) {
+			this.setState({ err: err.message })
+		}
+	}
+
 	@autobind async onRemove(id) {
 		try {
 			const session = frontCookie.get('session')
@@ -138,7 +181,23 @@ import Header from '../components/Header.js'
 			const gems = this.state.gems.filter(g => {
 				return g._id !== id
 			})
-			this.setState({ gems })
+			this.setState(
+				{
+					gems,
+					tip: {
+						message: 'Deleted 1 Gem.',
+						actionMessage: 'undo',
+						action: () => {
+							this.undoRemove(id)
+						}
+					}
+				},
+				() => {
+					setTimeout(() => {
+						this.setState({ tip: false })
+					}, 20000)
+				}
+			)
 		} catch (err) {
 			this.setState({ err: err.message })
 		}
@@ -226,10 +285,9 @@ import Header from '../components/Header.js'
 		return (
 			<div style={styles.container}>
 				{this.state.err || this.props.url.query.err
-					? <div style={styles.message}>
-							{this.state.err || this.props.url.query.err}
-						</div>
+					? <Tip message={this.state.err || this.props.url.query.err} />
 					: null}
+				{this.state.tip ? <Tip {...this.state.tip} /> : null}
 				<div style={styles.card}>
 					<div style={styles.toolbar}>
 						<h2 style={styles.heading}>
@@ -489,7 +547,7 @@ export default class Wrapper extends Component {
 		const { data: { gems: { gems, hasNextPage } } } = await client.query({
 			query: gql`
 					query getGems($session: String!) {
-						gems(sessionToken: $session, first: 10) {
+						gems(sessionToken: $session) {
 							hasNextPage
 							gems {
 								title

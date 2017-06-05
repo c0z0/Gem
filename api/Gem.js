@@ -7,7 +7,11 @@ const GemSchema = new mongoose.Schema({
 	tags: Array,
 	content: Array,
 	time: Number,
-	heading: String
+	heading: String,
+	deleted: {
+		type: Boolean,
+		default: false
+	}
 })
 
 module.exports = mongoose.model('Gem', GemSchema)

@@ -8,6 +8,7 @@ import gql from 'graphql-tag'
 
 import appoloClient from '../appoloClient.js'
 const client = appoloClient()
+import Tip from '../components/Tip.js'
 import Header from '../components/Header.js'
 
 const stages = {
@@ -137,9 +138,7 @@ const stages = {
 			<div>
 				<Header />
 				{this.state.err || this.props.url.query.err
-					? <div style={styles.message}>
-							{this.state.err || this.props.url.query.err}
-						</div>
+					? <Tip message={this.state.err || this.props.url.query.err} light />
 					: null}
 				<div style={styles.container}>
 					<div style={styles.card} class="card">

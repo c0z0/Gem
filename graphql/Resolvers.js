@@ -15,7 +15,7 @@ const resolvers = {}
 
 resolvers.gems = async ({ sessionToken, first, offset }) => {
 	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'cacat')
-	let gems = await Gem.find({ email })
+	let gems = await Gem.find({ email, deleted: false })
 	gems = _.sortBy(gems, [
 		function(o) {
 			return -o.time
@@ -128,7 +128,7 @@ resolvers.saveGem = async ({ url, sessionToken, tags }) => {
 
 resolvers.deleteGem = async ({ sessionToken, id }) => {
 	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'cacat')
-	const gem = await Gem.findByIdAndRemove(id)
+	const gem = await Gem.findByIdAndUpdate(id, { deleted: true })
 	return gem
 }
 
@@ -146,6 +146,12 @@ resolvers.disableArticleView = async ({ sessionToken, id }) => {
 			error: "You aren't allowed to do this."
 		}
 	await Gem.findByIdAndUpdate(id, { content: [] })
+	return gem
+}
+
+resolvers.undoDeleteGem = async ({ sessionToken, id }) => {
+	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'cacat')
+	const gem = await Gem.findByIdAndUpdate(id, { deleted: false })
 	return gem
 }
 
