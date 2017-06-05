@@ -29,7 +29,7 @@ router.post('/register', (req, res) => {
 	User.create({ email: req.body.email, password }, (err, user) => {
 		if (err) return res.status(500).json(err.message)
 		res.json({
-			_id: jwt.sign({ email: user.email }, process.env.DB_PASS || 'cacat')
+			_id: jwt.sign({ email: user.email }, process.env.DB_PASS || 'secret')
 		})
 	})
 })
@@ -41,7 +41,7 @@ router.post('/login', (req, res) => {
 		if (!bcrypt.compareSync(req.body.password, user.password))
 			return res.json({ err: 'Invalid email or password' })
 		res.json({
-			_id: jwt.sign({ email: user.email }, process.env.DB_PASS || 'cacat')
+			_id: jwt.sign({ email: user.email }, process.env.DB_PASS || 'secret')
 		})
 	})
 })
@@ -49,7 +49,7 @@ router.post('/login', (req, res) => {
 router.post('/gem/url/:token', (req, res) => {
 	jwt.verify(
 		req.params.token,
-		process.env.DB_PASS || 'cacat',
+		process.env.DB_PASS || 'secret',
 		(err, session) => {
 			if (err) return res.status(403).json('Invalid session')
 			let { url } = req.body
@@ -82,7 +82,7 @@ router.post('/gem/url/:token', (req, res) => {
 router.post('/gem/:token', (req, res) => {
 	jwt.verify(
 		req.params.token,
-		process.env.DB_PASS || 'cacat',
+		process.env.DB_PASS || 'secret',
 		(err, session) => {
 			if (err) return res.status(403).json('Invalid session')
 			const time = new Date().getTime()
@@ -109,7 +109,7 @@ router.post('/gem/:token', (req, res) => {
 router.get('/gem/:token', (req, res) => {
 	jwt.verify(
 		req.params.token,
-		process.env.DB_PASS || 'cacat',
+		process.env.DB_PASS || 'secret',
 		(err, session) => {
 			if (err) return res.status(403).json('Invalid session')
 			Gem.find({ email: session.email }, (err, gems) => {
@@ -130,7 +130,7 @@ router.get('/gem/:token', (req, res) => {
 router.delete('/gem/:token/:id', (req, res) => {
 	jwt.verify(
 		req.params.token,
-		process.env.DB_PASS || 'cacat',
+		process.env.DB_PASS || 'secret',
 		(err, session) => {
 			if (err) return res.status(403).json('Invalid session')
 			Gem.findById(req.params.id, (err, gem) => {
