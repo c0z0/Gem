@@ -1,0 +1,78 @@
+const schema = `
+	type LoginResponse {
+		sessionToken: String,
+		error: Error
+	}
+
+	type Error {
+		message: String!
+	}
+
+	type CheckEmailResponse {
+		exists: Boolean,
+		error: Error
+	}
+
+	#A saved url
+	type Gem {
+		#Page title
+		title: String
+		#The url
+		url: String
+		heading: String
+		hasContent: Boolean
+		email: Boolean
+		tags: [String],
+		_id: String!,
+		content: [String]
+	}
+
+	type GemResponse {
+		gem: Gem,
+		error: Error
+	}
+
+	input  UrlInput {
+		title: String
+		url: String
+		heading: String
+		hasContent: Boolean
+		content: [String]
+	}
+	
+	type Url {
+		title: String
+		url: String
+		heading: String
+		hasContent: Boolean
+		content: [String]
+	}
+
+	type CheckUrlResponse {
+		url: Url
+		error: Error
+	}
+
+	type GemsResponse {
+		gems: [Gem]
+		hasNextPage: Boolean
+	}
+
+	type Query {
+		gem(id: String!): Gem
+		gems(sessionToken: String!, first: Int, offset: Int): GemsResponse
+	}
+
+	type Mutation {
+		login(email: String!, password: String!): LoginResponse
+		register(email: String!, password: String!): LoginResponse
+		checkUrl(url: String!): CheckUrlResponse
+		disableArticleView(sessionToken: String!, id: String!): Gem
+		saveGem(sessionToken: String!, url: UrlInput, tags: [String]): GemResponse
+		checkEmail(email: String!): CheckEmailResponse
+		deleteGem(sessionToken: String!, id: String!): Gem
+		undoDeleteGem(sessionToken: String!, id: String!): Gem
+	}
+
+` 
+module.exports = schema
