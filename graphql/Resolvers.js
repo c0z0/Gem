@@ -14,7 +14,7 @@ function validateEmail(email) {
 const resolvers = {}
 
 resolvers.gems = async ({ sessionToken, first, offset }) => {
-	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'cacat')
+	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'secret')
 	let gems = await Gem.find({ email, deleted: false })
 	gems = _.sortBy(gems, [
 		function(o) {
@@ -50,7 +50,7 @@ resolvers.login = async ({ email, password }) => {
 			}
 		}
 	return {
-		sessionToken: jwt.sign({ email }, process.env.DB_PASS || 'cacat')
+		sessionToken: jwt.sign({ email }, process.env.DB_PASS || 'secret')
 	}
 }
 
@@ -74,7 +74,7 @@ resolvers.checkEmail = async ({ email }) => {
 resolvers.register = async ({ email, password }) => {
 	await User.create({ email, password: bcrypt.hashSync(password) })
 	return {
-		sessionToken: jwt.sign({ email }, process.env.DB_PASS || 'cacat')
+		sessionToken: jwt.sign({ email }, process.env.DB_PASS || 'secret')
 	}
 }
 
@@ -110,7 +110,7 @@ resolvers.checkUrl = async ({ url }) => {
 }
 
 resolvers.saveGem = async ({ url, sessionToken, tags }) => {
-	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'cacat')
+	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'secret')
 	const gem = await Gem.create({
 		url: url.url,
 		content: url.content,
@@ -127,7 +127,7 @@ resolvers.saveGem = async ({ url, sessionToken, tags }) => {
 }
 
 resolvers.deleteGem = async ({ sessionToken, id }) => {
-	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'cacat')
+	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'secret')
 	const gem = await Gem.findByIdAndUpdate(id, { deleted: true })
 	return gem
 }
@@ -139,7 +139,7 @@ resolvers.gem = async ({ id }) => {
 }
 
 resolvers.disableArticleView = async ({ sessionToken, id }) => {
-	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'cacat')
+	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'secret')
 	const gem = await Gem.findById(id)
 	if (gem.email !== email)
 		return {
@@ -150,7 +150,7 @@ resolvers.disableArticleView = async ({ sessionToken, id }) => {
 }
 
 resolvers.undoDeleteGem = async ({ sessionToken, id }) => {
-	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'cacat')
+	const { email } = jwt.verify(sessionToken, process.env.DB_PASS || 'secret')
 	const gem = await Gem.findByIdAndUpdate(id, { deleted: false })
 	return gem
 }
