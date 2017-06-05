@@ -6,7 +6,10 @@ import frontCookie from 'js-cookie'
 import cookie from 'cookie'
 import Router from 'next/router'
 import _ from 'lodash'
+import gql from 'graphql-tag'
 
+import appoloClient from '../appoloClient.js'
+const client = appoloClient()
 import SearchInput from '../components/Search.js'
 import TagsInput from '../components/TagsInput.js'
 import Input from '../components/Input.js'
@@ -35,15 +38,32 @@ import Header from '../components/Header.js'
 		this.setState({ loading: true })
 		const session = frontCookie.get('session')
 		try {
-			const { data } = await axios.post(`/api/gem/url/${session}`, {
-				url: this.state.new
+			const { data: { checkUrl: { url, error } } } = await client.mutate({
+				mutation: gql`
+					mutation getUrlDetails($url: String!) {
+						checkUrl(url: $url) {
+							error {
+								message
+							}
+							url {
+								title
+								heading
+								url
+								content
+							}
+						}
+					}
+				`,
+				variables: {
+					url: this.state.new
+				}
 			})
-			if (data.err) return this.setState({ err: data.err, loading: false })
+			if (error) return this.setState({ err: error.message, loading: false })
 			this.setState({
 				stage: 1,
 				loading: false,
 				err: false,
-				url: data
+				url: url
 			})
 		} catch (err) {
 			this.setState({ err: err.message, loading: false })
@@ -56,18 +76,43 @@ import Header from '../components/Header.js'
 		const tags = this._tagsInput.getTags()
 		const session = frontCookie.get('session')
 		try {
-			const { data } = await axios.post(`/api/gem/${session}`, {
-				...this.state.url,
-				tags
+			const { data: { saveGem: { error, gem } } } = await client.mutate({
+				mutation: gql`
+					mutation saveGem($title: String!, $session: String!, $tags: [String]!,
+						$url: String!, $heading: String!, $content: [String]!) {
+						saveGem(sessionToken: $session, url: {
+							title: $title,
+							url: $url,
+							heading: $heading,
+							content: $content
+						}, tags: $tags) {
+							gem {
+								title
+								url
+								hasContent
+								tags
+								_id
+							}
+							error {
+								message
+							}
+						}
+					}
+				`,
+				variables: {
+					session,
+					tags,
+					...this.state.url
+				}
 			})
-			if (data.err) return this.setState({ err: data.err, loading: false })
+			if (error) return this.setState({ err: error.message, loading: false })
 			this.setState({
 				stage: 0,
 				add: false,
 				new: '',
 				loading: false,
 				err: false,
-				gems: [data].concat(this.state.gems)
+				gems: [gem].concat(this.state.gems)
 			})
 		} catch (err) {
 			this.setState({ err: err.message, loading: false })
@@ -77,7 +122,19 @@ import Header from '../components/Header.js'
 	@autobind async onRemove(id) {
 		try {
 			const session = frontCookie.get('session')
-			await axios.delete(`/api/gem/${session}/${id}`)
+			await client.mutate({
+				mutation: gql`
+					mutation removeGem($id: String!, $session: String!) {
+						deleteGem(id: $id, sessionToken: $session) {
+							title
+						}
+					}
+				`,
+				variables: {
+					id,
+					session
+				}
+			})
 			const gems = this.state.gems.filter(g => {
 				return g._id !== id
 			})
@@ -423,15 +480,35 @@ const styles = {
 
 export default class Wrapper extends Component {
 	static async getInitialProps({ query, req }) {
-		const baseUrl = req ? `${req.protocol}://${req.headers.host}` : ''
+		const client = appoloClient(req)
 
 		const session = req
 			? cookie.parse(req.headers.cookie).session
 			: frontCookie.get('session')
 
-		const { data } = await axios.get(baseUrl + `/api/gem/${session}`)
+		const { data: { gems: { gems, hasNextPage } } } = await client.query({
+			query: gql`
+					query getGems($session: String!) {
+						gems(sessionToken: $session, first: 10) {
+							hasNextPage
+							gems {
+								title
+								url
+								hasContent
+								tags
+								_id
+							}
+						}
+					}
+				`,
+			variables: {
+				session
+			}
+		})
+
 		return {
-			gems: data,
+			gems,
+			hasNextPage,
 			userAgent: req ? req.headers['user-agent'] : navigator.userAgent
 		}
 	}

@@ -4,10 +4,12 @@ const next = require('next')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const morgan = require('morgan')
+mongoose.Promise = global.Promise
 
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const routes = require('./api/index.js')
+const graphql = require('./graphql/index.js')
 const handle = app.getRequestHandler()
 
 const db_url = process.env.DB_USER
@@ -25,6 +27,7 @@ app
 		const server = express()
 
 		// server.use(morgan('combined'))
+		server.use('/graphql', graphql)
 		server.use('/api/*', bodyParser.json())
 		server.use('/', cookieParser())
 		server.use('/api', routes)

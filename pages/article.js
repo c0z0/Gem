@@ -3,7 +3,11 @@ import axios from 'axios'
 import Radium, { StyleRoot } from 'radium'
 import autobind from 'autobind-decorator'
 import Router from 'next/router'
+import gql from 'graphql-tag'
+import cookie from 'js-cookie'
 
+import appoloClient from '../appoloClient.js'
+const client = appoloClient()
 import Header from '../components/Header.js'
 
 @Radium class Article extends Component {
@@ -11,6 +15,26 @@ import Header from '../components/Header.js'
 
 	async componentDidMount() {
 		window.addEventListener('scroll', this.handleScroll)
+	}
+
+	@autobind async disableArticleView() {
+		await client.mutate({
+			mutation: gql`
+				mutation disableArticle($session: String!, $id: String!) {
+					disableArticleView(sessionToken: $session, id: $id) {
+						title
+					}
+				}
+			`,
+			variables: {
+				id: this.props._id,
+				session: cookie.get('session')
+			}
+		})
+		Router.replace(
+			'/gems?err=Sorry about that... Article View is still in beta.',
+			'/gems'
+		)
 	}
 
 	@autobind handleScroll() {
@@ -90,21 +114,16 @@ import Header from '../components/Header.js'
 							>
 								Article not loading properly?
 								{' '}
-								<a
-									onClick={async () => {
-										await axios.get(
-											`/api/article/problem/${this.props.url.query.id}`
-										)
-										Router.replace(
-											'/gems?err=Sorry about that... Article View is still in beta.',
-											'/gems'
-										)
+								<span
+									onClick={this.disableArticleView}
+									style={{
+										color: '#999',
+										cursor: 'pointer',
+										textDecoration: 'underline'
 									}}
-									href="#"
-									style={{ color: '#999' }}
 								>
 									Disable article view for this gem.
-								</a>
+								</span>
 							</p>
 						: null}
 				</div>
@@ -160,13 +179,25 @@ const styles = {
 
 export default class Wrapper extends Component {
 	static async getInitialProps({ query, req }) {
-		const baseUrl = req ? `${req.protocol}://${req.headers.host}` : ''
-		const { data } = await axios.get(baseUrl + `/api/article/${query.id}`)
+		const client = appoloClient(req)
+
+		const { data: { gem } } = await client.query({
+			query: gql`
+				query getGem($id: String!) {
+					gem(id: $id) {
+						content
+						title
+						heading
+						outsideUrl: url
+						_id
+					}
+				}
+			`,
+			variables: { id: query.id }
+		})
+
 		return {
-			content: data.content,
-			heading: data.heading,
-			outsideUrl: data.url,
-			title: data.title,
+			...gem,
 			userAgent: req ? req.headers['user-agent'] : navigator.userAgent
 		}
 	}

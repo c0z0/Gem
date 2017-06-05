@@ -20,10 +20,10 @@ import clipboard from 'clipboard-js'
 	}
 
 	render() {
-		const link = this.props.content.length
+		const link = this.props.hasContent
 			? `/article?id=${this.props._id}`
 			: this.props.url
-		const as = this.props.content.length
+		const as = this.props.hasContent
 			? `/article/${this.props._id}`
 			: this.props.url
 		const tags = this.props.tags.map((t, i) => (

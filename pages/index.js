@@ -4,7 +4,10 @@ import autobind from 'autobind-decorator'
 import Router from 'next/router'
 import axios from 'axios'
 import cookie from 'js-cookie'
+import gql from 'graphql-tag'
 
+import appoloClient from '../appoloClient.js'
+const client = appoloClient()
 import Header from '../components/Header.js'
 
 const stages = {
@@ -31,7 +34,64 @@ const stages = {
 		stage: 'email',
 		password: '',
 		err: false,
-		loading: false
+		loading: false,
+		keep: true
+	}
+
+	@autobind async login() {
+		this.setState({ loading: true })
+		try {
+			const { data: { login: { sessionToken, error } } } = await client.mutate({
+				mutation: gql`
+							mutation login($email: String!, $password: String!) {
+								login(email: $email, password: $password) {
+									sessionToken
+									error {
+										message
+									}
+								}
+							}
+						`,
+				variables: {
+					...this.state
+				}
+			})
+			if (error) return this.setState({ err: error.message, loading: false })
+			const options = this.state.keep ? { expires: 14 } : {}
+			cookie.set('session', sessionToken, options)
+			Router.replace('/gems')
+		} catch (err) {
+			this.setState({ loading: false, err: err.message })
+		}
+	}
+
+	@autobind async register() {
+		this.setState({ loading: true })
+		try {
+			const {
+				data: { register: { sessionToken, error } }
+			} = await client.mutate({
+				mutation: gql`
+							mutation register($email: String!, $password: String!) {
+								register(email: $email, password: $password) {
+									sessionToken
+									error {
+										message
+									}
+								}
+							}
+						`,
+				variables: {
+					...this.state
+				}
+			})
+			if (error) return this.setState({ err: error.message, loading: false })
+			const options = this.state.keep ? { expires: 14 } : {}
+			cookie.set('session', sessionToken, options)
+			Router.replace('/gems')
+		} catch (err) {
+			this.setState({ loading: false, err: err.message })
+		}
 	}
 
 	@autobind async check(e) {
@@ -40,12 +100,24 @@ const stages = {
 			if (!this.state.email.length) return
 			try {
 				this.setState({ loading: true })
-				const { data } = await axios.post('/api/email', {
-					email: this.state.email
+				const {
+					data: { checkEmail: { exists, error } }
+				} = await client.mutate({
+					mutation: gql`
+						mutation checkEmail($email: String!) {
+							checkEmail(email: $email) {
+								exists,
+								error {
+									message
+								}
+							}
+						}
+					`,
+					variables: { email: this.state.email }
 				})
-				if (data.err) return this.setState({ err: data.err, loading: false })
+				if (error) return this.setState({ err: error.message, loading: false })
 				this.setState({
-					stage: data.new ? 'new' : 'old',
+					stage: exists ? 'old' : 'new',
 					err: '',
 					loading: false
 				})
@@ -55,30 +127,8 @@ const stages = {
 			}
 		} else {
 			if (!this.state.password.length) return
-			try {
-				this.setState({ loading: true })
-				const {
-					data
-				} = await axios.post(
-					`/api/${this.state.stage === 'old' ? 'login' : 'register'}`,
-					{
-						email: this.state.email,
-						password: this.state.password
-					}
-				)
-				if (data.err) return this.setState({ err: data.err, loading: false })
-				cookie.set('session', data._id, { expires: 14 })
-				Router.replace('/gems')
-			} catch (err) {
-				this.setState({ err: err.message, loading: false })
-			}
-		}
-	}
-
-	static async getInitialProps({ query, req }) {
-		return {
-			err: query.err,
-			userAgent: req ? req.headers['user-agent'] : navigator.userAgent
+			if (this.state.stage === 'old') await this.login()
+			else await this.register()
 		}
 	}
 
@@ -153,7 +203,28 @@ const stages = {
 										</div>
 									: <i class="material-icons">check</i>}
 							</div>
+
 						</form>
+						{this.state.stage !== 'email'
+							? <div style={{ padding: '16px' }}>
+									<input
+										type="checkbox"
+										checked={this.state.keep}
+										onChange={() => {
+											this.setState({ keep: !this.state.keep })
+										}}
+									/>
+									<label
+										onClick={() => {
+											this.setState({ keep: !this.state.keep })
+										}}
+										htmlFor=""
+										style={{ marginLeft: '4px', color: '#75489B' }}
+									>
+										Keep me logged in
+									</label>
+								</div>
+							: null}
 					</div>
 				</div>
 			</div>
