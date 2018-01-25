@@ -50,7 +50,7 @@ const styles = {
 	input: {
 		border: 0,
 		outline: 0,
-		color: '#0000',
+		color: '#000',
 		padding: '8',
 		flex: 5,
 		fontSize: '130%'
