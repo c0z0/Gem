@@ -12,8 +12,8 @@ const routes = require('./api/index.js')
 const graphql = require('./graphql/index.js')
 const handle = app.getRequestHandler()
 
-const db_url = process.env.DB_USER
-	? `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@ds151451.mlab.com:51451/gem`
+const db_url = process.env.DB_URL
+	? DB_URL
 	: 'mongodb://localhost:27017/gems'
 
 mongoose.connect(db_url, err => {
