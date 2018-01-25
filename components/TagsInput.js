@@ -2,10 +2,12 @@ import React, { Component } from 'react'
 import Radium from 'radium'
 import autobind from 'autobind-decorator'
 
-@Radium class Input extends Component {
+@Radium
+class Input extends Component {
 	state = { tag: '', tags: [] }
 
-	@autobind getTags() {
+	@autobind
+	getTags() {
 		if (this.state.tag.length) return this.state.tags.concat([this.state.tag])
 		return this.state.tags
 	}
@@ -13,8 +15,7 @@ import autobind from 'autobind-decorator'
 	render() {
 		const tags = this.state.tags.map((t, i) => (
 			<div style={styles.tag} key={i}>
-				{t}
-				{' '}
+				{t}{' '}
 				<i
 					className="material-icons"
 					style={styles.closeIcon}
@@ -64,13 +65,15 @@ import autobind from 'autobind-decorator'
 					value={this.state.tag}
 				/>
 				<div onClick={this.props.onClick} style={[styles.inputButton]}>
-					{this.props.loading
-						? <div class="spinner">
-								<div class="bounce1" />
-								<div class="bounce2" />
-								<div class="bounce3" />
-							</div>
-						: <i className="material-icons">add</i>}
+					{this.props.loading ? (
+						<div class="spinner">
+							<div class="bounce1" />
+							<div class="bounce2" />
+							<div class="bounce3" />
+						</div>
+					) : (
+						<i className="material-icons">add</i>
+					)}
 				</div>
 			</div>
 		)
@@ -101,7 +104,7 @@ const styles = {
 	input: {
 		border: 0,
 		outline: 0,
-		color: '#0000',
+		color: '#000',
 		padding: '8px',
 		flex: 7,
 		fontSize: '130%',

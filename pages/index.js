@@ -23,13 +23,15 @@ const stages = {
 		type: 'password'
 	},
 	new: {
-		text: 'It looks that you are new here! To get started, enter a password bellow: ',
+		text:
+			'It looks that you are new here! To get started, enter a password bellow: ',
 		placeholder: 'Password...',
 		type: 'password'
 	}
 }
 
-@Radium class Index extends Component {
+@Radium
+class Index extends Component {
 	state = {
 		email: '',
 		stage: 'email',
@@ -39,20 +41,21 @@ const stages = {
 		keep: true
 	}
 
-	@autobind async login() {
+	@autobind
+	async login() {
 		this.setState({ loading: true })
 		try {
 			const { data: { login: { sessionToken, error } } } = await client.mutate({
 				mutation: gql`
-							mutation login($email: String!, $password: String!) {
-								login(email: $email, password: $password) {
-									sessionToken
-									error {
-										message
-									}
-								}
+					mutation login($email: String!, $password: String!) {
+						login(email: $email, password: $password) {
+							sessionToken
+							error {
+								message
 							}
-						`,
+						}
+					}
+				`,
 				variables: {
 					...this.state
 				}
@@ -66,22 +69,23 @@ const stages = {
 		}
 	}
 
-	@autobind async register() {
+	@autobind
+	async register() {
 		this.setState({ loading: true })
 		try {
 			const {
 				data: { register: { sessionToken, error } }
 			} = await client.mutate({
 				mutation: gql`
-							mutation register($email: String!, $password: String!) {
-								register(email: $email, password: $password) {
-									sessionToken
-									error {
-										message
-									}
-								}
+					mutation register($email: String!, $password: String!) {
+						register(email: $email, password: $password) {
+							sessionToken
+							error {
+								message
 							}
-						`,
+						}
+					}
+				`,
 				variables: {
 					...this.state
 				}
@@ -95,27 +99,28 @@ const stages = {
 		}
 	}
 
-	@autobind async check(e) {
+	@autobind
+	async check(e) {
 		e.preventDefault()
 		if (this.state.stage === 'email') {
 			if (!this.state.email.length) return
 			try {
 				this.setState({ loading: true })
-				const {
-					data: { checkEmail: { exists, error } }
-				} = await client.mutate({
-					mutation: gql`
-						mutation checkEmail($email: String!) {
-							checkEmail(email: $email) {
-								exists,
-								error {
-									message
+				const { data: { checkEmail: { exists, error } } } = await client.mutate(
+					{
+						mutation: gql`
+							mutation checkEmail($email: String!) {
+								checkEmail(email: $email) {
+									exists
+									error {
+										message
+									}
 								}
 							}
-						}
-					`,
-					variables: { email: this.state.email }
-				})
+						`,
+						variables: { email: this.state.email }
+					}
+				)
 				if (error) return this.setState({ err: error.message, loading: false })
 				this.setState({
 					stage: exists ? 'old' : 'new',
@@ -137,29 +142,27 @@ const stages = {
 		return (
 			<div>
 				<Header />
-				{this.state.err || this.props.url.query.err
-					? <Tip message={this.state.err || this.props.url.query.err} light />
-					: null}
+				{this.state.err || this.props.url.query.err ? (
+					<Tip message={this.state.err || this.props.url.query.err} light />
+				) : null}
 				<div style={styles.container}>
 					<div style={styles.card} class="card">
 						<img style={{ height: '96px' }} src="static/diamond.svg" />
-						<h1 style={styles.heading}>
-							Gem
-						</h1>
+						<h1 style={styles.heading}>Gem</h1>
 						<h4 style={styles.heading}>Keep your precious finds.</h4>
 						<h3 style={styles.heading}>{stages[this.state.stage].text}</h3>
 						<form style={styles.inputContainer} onSubmit={this.check}>
-							{this.state.stage !== 'email'
-								? <div
-										style={[styles.inputButton, { flex: 0.5 }]}
-										onClick={() => {
-											this.setState({ stage: 'email', password: '' })
-											this._input.focus()
-										}}
-									>
-										<i class="material-icons">arrow_back</i>
-									</div>
-								: null}
+							{this.state.stage !== 'email' ? (
+								<div
+									style={[styles.inputButton, { flex: 0.5 }]}
+									onClick={() => {
+										this.setState({ stage: 'email', password: '' })
+										this._input.focus()
+									}}
+								>
+									<i class="material-icons">arrow_back</i>
+								</div>
+							) : null}
 							<input
 								autoFocus
 								ref={i => {
@@ -194,36 +197,37 @@ const stages = {
 								]}
 								onClick={this.check}
 							>
-								{this.state.loading
-									? <div class="spinner">
-											<div class="bounce1" />
-											<div class="bounce2" />
-											<div class="bounce3" />
-										</div>
-									: <i class="material-icons">check</i>}
+								{this.state.loading ? (
+									<div class="spinner">
+										<div class="bounce1" />
+										<div class="bounce2" />
+										<div class="bounce3" />
+									</div>
+								) : (
+									<i class="material-icons">check</i>
+								)}
 							</div>
-
 						</form>
-						{this.state.stage !== 'email'
-							? <div style={{ padding: '16px' }}>
-									<input
-										type="checkbox"
-										checked={this.state.keep}
-										onChange={() => {
-											this.setState({ keep: !this.state.keep })
-										}}
-									/>
-									<label
-										onClick={() => {
-											this.setState({ keep: !this.state.keep })
-										}}
-										htmlFor=""
-										style={{ marginLeft: '4px', color: '#75489B' }}
-									>
-										Keep me logged in
-									</label>
-								</div>
-							: null}
+						{this.state.stage !== 'email' ? (
+							<div style={{ padding: '16px' }}>
+								<input
+									type="checkbox"
+									checked={this.state.keep}
+									onChange={() => {
+										this.setState({ keep: !this.state.keep })
+									}}
+								/>
+								<label
+									onClick={() => {
+										this.setState({ keep: !this.state.keep })
+									}}
+									htmlFor=""
+									style={{ marginLeft: '4px', color: '#75489B' }}
+								>
+									Keep me logged in
+								</label>
+							</div>
+						) : null}
 					</div>
 				</div>
 			</div>
@@ -272,7 +276,7 @@ const styles = {
 	input: {
 		border: 0,
 		outline: 0,
-		color: '#0000',
+		color: '#000',
 		padding: '8px',
 		flex: 5,
 		fontSize: '130%'
