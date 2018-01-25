@@ -13,7 +13,7 @@ const graphql = require('./graphql/index.js')
 const handle = app.getRequestHandler()
 
 const db_url = process.env.DB_URL
-	? DB_URL
+	? process.env.DB_URL
 	: 'mongodb://localhost:27017/gems'
 
 mongoose.connect(db_url, err => {
